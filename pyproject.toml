@@ -1,13 +1,16 @@
 [tool.poetry]
 name = "jarvice-cli"
-version = "0.1.0"
+version = "1.0.0"
 description = ""
-authors = ["BuildTools <unconfigured@null.spigotmc.org>"]
+authors = ["Nimbix <support@nimbix.net>"]
 readme = "README.md"
+repository = "https://github.com/nimbix/jarvice-cli"
 packages = [{include = "jarvice_cli"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+typer = "^0.9.0"
+jarviceapi-client = {git = "https://github.com/nimbix/python-jarviceapi"}
 
 
 [build-system]
