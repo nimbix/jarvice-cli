@@ -22,7 +22,19 @@ class jarviceapi:
             host = url
         )
 
-    def submit(self, job_jsonfile : Path):
+    def submitJson(self, jobSubmission : jarviceapi_client.Submission):
+        with jarviceapi_client.ApiClient(self._configuration) as api_client:
+            api_instance = jarviceapi_client.JobControlApi(api_client)
+            # Inject user
+            if jobSubmission.user is None:
+                jobSubmission.user = jarviceapi_client.SubmitUser()
+            jobSubmission.user.username = self._username
+            jobSubmission.user.apikey = self._apikey
+
+            return api_instance.submit_post(jobSubmission)
+
+
+    def submitJsonFile(self, job_jsonfile : Path):
         """
         Submits a job to Jarvice XE
         
@@ -30,49 +42,41 @@ class jarviceapi:
             job_jsonfile (Path) : json file containing job launch definition
 
         Raises:
+            apiException.OpenApiException
+        """
+        with open(job_jsonfile) as job_jsonfile_hd:
+            json_object = json.load(job_jsonfile_hd)
+            jobSubmission = jarviceapi_client.Submission.from_dict(json_object)
+            return self.submitJson(jobSubmission)
+
+    def tail(self, job : Union[int, str], lines = 0):
+        """
+        See the output/error of a currently running job
+        
+        Raises:
             Exception: Raises an exception.
         """
         with jarviceapi_client.ApiClient(self._configuration) as api_client:
-            api_instance = jarviceapi_client.JobControlApi(api_client)
-            with open(job_jsonfile) as job_jsonfile_hd:
-                json_object = json.load(job_jsonfile_hd)
-                jobSubmission = jarviceapi_client.Submission.from_dict(json_object)
-                # Inject user
-                if jobSubmission.user is None:
-                    jobSubmission.user = jarviceapi_client.SubmitUser()
-                jobSubmission.user.username = self._username
-                jobSubmission.user.apikey = self._apikey
-
-                return api_instance.submit_post(jobSubmission)
+            api_instance = jarviceapi_client.StatusAndInformationApi(api_client)
+            if type(job) is str:
+                return api_instance.tail_get(self._apikey, self._username, name=job, lines=lines)
+            elif type(job) is int:
+                return api_instance.tail_get(self._apikey, self._username, number=job, lines=lines)
             
-
-    def summary(self):
-        """
-        List a summary of your jobs
-        
-        Raises:
-            Exception: Raises an exception.
-        """
-        retval = OrderedDict()
-
-        raise Exception("summary is not implemented")
-        return retval
-    
-    def tail(self, job : Union[int, str], lines):
-        """
-        List a summary of your jobs
-        
-        Raises:
-            Exception: Raises an exception.
-        """
-        retval : str
-        raise Exception("tail is not implemented")
-        return retval
     
     def output(self, job : Union[int, str], lines):
-        retval : str
-        raise Exception("output is not implemented")
-        return retval
+        """
+        See the output of a currently running job
+        
+        Raises:
+            Exception: Raises an exception.
+        """
+        with jarviceapi_client.ApiClient(self._configuration) as api_client:
+            api_instance = jarviceapi_client.StatusAndInformationApi(api_client)
+            if type(job) is str:
+                return api_instance.output_get(self._apikey, self._username, name=job, lines=lines)
+            elif type(job) is int:
+                return api_instance.output_get(self._apikey, self._username, number=job, lines=lines)
     
     def connect(self, job : Union[int, str]):
         """
@@ -80,10 +84,25 @@ class jarviceapi:
         Raises:
             Exception: Raises an exception.
         """
-        address : str
-        password : str
-        raise Exception("connect is not implemented")
-        return address, password
+        address : str = "NONE"
+        password : str = "NONE"
+        with jarviceapi_client.ApiClient(self._configuration) as api_client:
+            api_instance = jarviceapi_client.StatusAndInformationApi(api_client)
+            
+            runtimeConnect : jarviceapi_client.RuntimeConnect
+            if type(job) is str:
+                runtimeConnect = api_instance.connect_get(self._apikey, self._username, name=job)
+            elif type(job) is int:
+                runtimeConnect = api_instance.connect_get(self._apikey, self._username, number=job)
+            else:
+                raise apiException.ApiException(status=501, http_resp="Invalid parameters")
+            if runtimeConnect:
+                if runtimeConnect.address:
+                    address = runtimeConnect.address
+                if runtimeConnect.password:
+                    password = runtimeConnect.password
+            return address,password
+
     
     def shutdown(self, job : Union[int, str]):
         """
@@ -92,7 +111,15 @@ class jarviceapi:
         Raises:
             Exception: Raises an exception.
         """
-        raise Exception("shutdown is not implemented")
+        with jarviceapi_client.ApiClient(self._configuration) as api_client:
+            api_instance = jarviceapi_client.JobControlApi(api_client)
+            
+            if type(job) is str:
+                api_instance.shutdown_get(self._apikey, self._username, name=job)
+            elif type(job) is int:
+                api_instance.shutdown_get(self._apikey, self._username, number=job)
+            else:
+                raise apiException.ApiException(status=501, http_resp="Invalid parameters")
     
     def terminate(self, job : Union[int, str]):
         """
@@ -101,7 +128,15 @@ class jarviceapi:
         Raises:
             Exception: Raises an exception.
         """
-        raise Exception("terminate is not implemented")
+        with jarviceapi_client.ApiClient(self._configuration) as api_client:
+            api_instance = jarviceapi_client.JobControlApi(api_client)
+            
+            if type(job) is str:
+                api_instance.terminate_get(self._apikey, self._username, name=job)
+            elif type(job) is int:
+                api_instance.terminate_get(self._apikey, self._username, number=job)
+            else:
+                raise apiException.ApiException(status=501, http_resp="Invalid parameters")
 
     def info(self, job : Union[int, str]):
         """

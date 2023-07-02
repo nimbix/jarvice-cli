@@ -88,23 +88,12 @@ def submit(
     Submit a job
     """
     try:
-        retDict = jarvice_api.submit(job_json)
+        retDict = jarvice_api.submitJsonFile(job_json)
         print("Submitted:",
               f"- ID  : {retDict['number']}",
               f"- Name: {retDict['name']}", sep='\n')
     except apiException.OpenApiException as e:
         print(f"Error : {e}")
-
-@jarvice_cli.command()
-def summary():
-    """
-    List a summary of your jobs
-    """
-    try:
-        jarvice_api.summary()
-    except Exception as e:
-        print(e)
-
 
 @jarvice_cli.command()
 def tail(
@@ -120,12 +109,14 @@ def tail(
     validateJobidJobname(jobid, jobname)
     
     try:
+        if lines is None:
+            lines = 0
         if jobid is not None:
-            jarvice_api.tail(jobid, lines)
+            print(jarvice_api.tail(jobid, lines))
         elif jobname is not None:
-            jarvice_api.tail(jobname, lines)
-    except Exception as e:
-        print(e)
+            print(jarvice_api.tail(jobname, lines))
+    except apiException.OpenApiException as e:
+        print(f"Error : {e}")
 
 @jarvice_cli.command()
 def output(
@@ -140,12 +131,14 @@ def output(
     """
     validateJobidJobname(jobid, jobname)    
     try:
+        if lines is None:
+            lines = 0
         if jobid is not None:
-            jarvice_api.output(jobid, lines)
+            print(jarvice_api.output(jobid, lines))
         elif jobname is not None:
-            jarvice_api.output(jobname, lines)
-    except Exception as e:
-        print(e)
+            print(jarvice_api.output(jobname, lines))
+    except apiException.OpenApiException as e:
+        print(f"Error : {e}")
 
 @jarvice_cli.command()
 def connect(
@@ -158,11 +151,15 @@ def connect(
     validateJobidJobname(jobid, jobname)
     try:
         if jobid is not None:
-            jarvice_api.connect(jobid)
+            address,password = jarvice_api.connect(jobid)
         elif jobname is not None:
-            jarvice_api.connect(jobname)
-    except Exception as e:
-        print(e)
+            address,password = jarvice_api.connect(jobname)
+        else:
+            return
+        print(f"Address : {address}")
+        print(f"Password : {password}")
+    except apiException.OpenApiException as e:
+        print(f"Error : {e}")
 
 @jarvice_cli.command()
 def shutdown(
@@ -178,8 +175,8 @@ def shutdown(
             jarvice_api.shutdown(jobid)
         elif jobname is not None:
             jarvice_api.shutdown(jobname)
-    except Exception as e:
-        print(e)
+    except apiException.OpenApiException as e:
+        print(f"Error : {e}")
 
 @jarvice_cli.command()
 def terminate(
@@ -195,8 +192,8 @@ def terminate(
             jarvice_api.terminate(jobid)
         elif jobname is not None:
             jarvice_api.terminate(jobname)
-    except Exception as e:
-        print(e)
+    except apiException.OpenApiException as e:
+        print(f"Error : {e}")
 
 @jarvice_cli.command()
 def info(
