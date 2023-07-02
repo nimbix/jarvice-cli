@@ -306,8 +306,8 @@ def shutdown_all():
     """
     try:
         jarvice_api.shutdown_all()
-    except Exception as e:
-        print(e)
+    except jarviceapi_client.OpenApiException as e:
+        print(f"Error : {e}")
 
 @jarvice_cli.command()
 def terminate_all():
@@ -316,8 +316,8 @@ def terminate_all():
     """
     try:
         jarvice_api.terminate_all()
-    except Exception as e:
-        print(e)
+    except jarviceapi_client.OpenApiException as e:
+        print(f"Error : {e}")
 
 @jarvice_cli.command()
 def wait_for(
@@ -333,8 +333,8 @@ def wait_for(
             jarvice_api.wait_for(jobid)
         elif jobname is not None:
             jarvice_api.wait_for(jobname)
-    except Exception as e:
-        print(e)
+    except jarviceapi_client.OpenApiException as e:
+        print(f"Error : {e}")
 
 
 ## Data Management ##
@@ -405,4 +405,4 @@ def machines():
         print(e)
 
 if __name__ == "__main__":
-    jarvice_cli(context_settings={"info_name":"jarvice-cli"})
+    jarvice_cli()

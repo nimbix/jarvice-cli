@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import json
+from time import sleep
 from typing import Optional, Tuple, Union
 import jarviceapi_client
 import jarviceapi_client.exceptions as apiException
@@ -215,7 +216,7 @@ class jarviceapi:
         Force termination of all jobs (like kill -9)
 
         Raises:
-            Exception: Raises an exception.
+            apiException.OpenApiException
         """
         jobs = self.jobs()
         for k,_ in jobs.items():
@@ -228,7 +229,14 @@ class jarviceapi:
         Raises:
             Exception: Raises an exception.
         """
-        raise Exception("wait_for is not implemented")
+        #trap for "COMPLETED WITH ERROR","COMPLETED","TERMINATED" "CANCELED"
+        while True:
+            statusDict = self.status(job)
+            for _,v in statusDict.items():
+                if v.job_status == "COMPLETED WITH ERROR" or v.job_status == "COMPLETED" or v.job_status == "TERMINATED" or v.job_status == "CANCELED":
+                    return
+                else:
+                    sleep(1)
 
     def download(self, source: str, destination: str, storage : str):
         """
