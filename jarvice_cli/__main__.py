@@ -5,8 +5,10 @@ import typer
 import os
 from typing import Optional, Annotated, Dict
 
-from jarviceapi import *
-from printer import *
+#from jarviceapi import *
+import jarviceapi_client
+from jarvice_cli.jarviceapi import jarviceapi
+from jarvice_cli.printer import *
 
 jarvice_cli = typer.Typer(help="The JARVICE CLI for interacting with Jarvice XE")
 
@@ -92,7 +94,7 @@ def submit(
         print("Submitted:",
               f"- ID  : {retDict['number']}",
               f"- Name: {retDict['name']}", sep='\n')
-    except apiException.OpenApiException as e:
+    except jarviceapi_client.OpenApiException as e:
         print(f"Error : {e}")
 
 @jarvice_cli.command()
@@ -115,7 +117,7 @@ def tail(
             print(jarvice_api.tail(jobid, lines))
         elif jobname is not None:
             print(jarvice_api.tail(jobname, lines))
-    except apiException.OpenApiException as e:
+    except jarviceapi_client.OpenApiException as e:
         print(f"Error : {e}")
 
 @jarvice_cli.command()
@@ -137,7 +139,7 @@ def output(
             print(jarvice_api.output(jobid, lines))
         elif jobname is not None:
             print(jarvice_api.output(jobname, lines))
-    except apiException.OpenApiException as e:
+    except jarviceapi_client.OpenApiException as e:
         print(f"Error : {e}")
 
 @jarvice_cli.command()
@@ -158,7 +160,7 @@ def connect(
             return
         print(f"Address : {address}")
         print(f"Password : {password}")
-    except apiException.OpenApiException as e:
+    except jarviceapi_client.OpenApiException as e:
         print(f"Error : {e}")
 
 @jarvice_cli.command()
@@ -175,7 +177,7 @@ def shutdown(
             jarvice_api.shutdown(jobid)
         elif jobname is not None:
             jarvice_api.shutdown(jobname)
-    except apiException.OpenApiException as e:
+    except jarviceapi_client.OpenApiException as e:
         print(f"Error : {e}")
 
 @jarvice_cli.command()
@@ -192,7 +194,7 @@ def terminate(
             jarvice_api.terminate(jobid)
         elif jobname is not None:
             jarvice_api.terminate(jobname)
-    except apiException.OpenApiException as e:
+    except jarviceapi_client.OpenApiException as e:
         print(f"Error : {e}")
 
 @jarvice_cli.command()
@@ -218,7 +220,7 @@ def info(
             printer = RichPrinter()
 
         printer.printRuntimeInfo(entry)
-    except apiException.OpenApiException as e:
+    except jarviceapi_client.OpenApiException as e:
         print(f"Error : {e}")
 
 @jarvice_cli.command()
@@ -246,7 +248,7 @@ def status(
         for k,v in entry.items():
             printer.printSchedStatusEntry(int(k),v)
 
-    except apiException.OpenApiException as e:
+    except jarviceapi_client.OpenApiException as e:
         print(f"Error : {e}")
 
 @jarvice_cli.command(deprecated=True)
@@ -265,9 +267,7 @@ def action(
         elif jobname is not None:
             jarvice_api.action(action, jobname)
         print(f"Action requested : {action}")
-    except apiException.UnauthorizedException as e:
-        print ("Error : Unauthorized\nInvalid username or apikey")
-    except apiException.OpenApiException as e:
+    except jarviceapi_client.OpenApiException as e:
         print(f"Error : {e}")
 
 @jarvice_cli.command()
@@ -296,9 +296,7 @@ def jobs(
 
         joblist = jarvice_api.jobs()
         printer.printJobEntry(joblist, verbose)
-    except apiException.UnauthorizedException as e:
-        print ("Error : Unauthorized\nInvalid username or apikey")
-    except apiException.OpenApiException as e:
+    except jarviceapi_client.OpenApiException as e:
         print(f"Error : {e}")
 
 @jarvice_cli.command()
@@ -407,4 +405,4 @@ def machines():
         print(e)
 
 if __name__ == "__main__":
-    jarvice_cli()
+    jarvice_cli(context_settings={"info_name":"jarvice-cli"})

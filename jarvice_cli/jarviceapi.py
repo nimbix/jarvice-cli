@@ -4,11 +4,8 @@ from typing import Optional, Tuple, Union
 import jarviceapi_client
 import jarviceapi_client.exceptions as apiException
 from pathlib import Path
-from traceback import print_exc
 
-import rich
 
-from jarvice_cli.__main__ import jobs
 
 class jarviceapi:
     _username : str
