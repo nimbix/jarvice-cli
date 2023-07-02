@@ -206,9 +206,11 @@ class jarviceapi:
         Cleanly shutdown all currently running jobs
 
         Raises:
-            Exception: Raises an exception.
+            apiException.OpenApiException
         """
-        raise Exception("shutdown_all is not implemented")
+        jobs = self.jobs()
+        for k,_ in jobs.items():
+            self.shutdown(int(k))
     
     
     def terminate_all(self):
@@ -218,7 +220,9 @@ class jarviceapi:
         Raises:
             Exception: Raises an exception.
         """
-        raise Exception("terminate_all is not implemented")
+        jobs = self.jobs()
+        for k,_ in jobs.items():
+            self.terminate(int(k))
 
     def wait_for(self, job : Union[int, str]):
         """
