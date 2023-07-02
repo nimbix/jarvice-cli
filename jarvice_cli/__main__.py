@@ -250,16 +250,24 @@ def action(
 @jarvice_cli.command()
 def jobs(
     verbose: Annotated[Optional[bool], typer.Option("-v", "--verbose",help="Full JSON payload")] = False,
-    raw : Annotated[Optional[bool], typer.Option("-r", "--raw",help="CSV style")] = False
+    raw : Annotated[Optional[bool], typer.Option("--no-rich",help="Without color")] = False
     ):
     """
-    Get a list of currently running jobs
+    Get a list of currently running jobs\n
+    Job Status :\n
+    CD 	The job has completed successfully.\n
+    CG 	The job is finishing but some processes are still active.\n
+    F 	The job terminated with a non-zero exit code and failed to execute.\n
+    PD 	The job is waiting for resource allocation. It will eventually run.\n
+    R 	The job currently is allocated to a node and is running.\n
+    ST 	A running job has been canceled or terminated.\n
+    UN 	Unknown status.
     """
     try:
         if verbose is None:
             verbose = False
         if raw:
-            printer = RawPrinter()
+            printer = NoRichPrinter()
         else:
             printer = RichPrinter()
             jarvice_cli.rich_markup_mode

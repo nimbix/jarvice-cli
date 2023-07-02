@@ -18,15 +18,23 @@ class GenPrinter:
 
     def printJobEntry(self, jobEntryList : Dict[str, api.JobEntry], verbose=False):
         pass
-    
-    def formatSize(self, string : Union[StrictStr,None], length : int):
-        if string is None:
-            return " "*length
+ 
+    def shortStatus(self, string : Union[StrictStr,None]):
+        # Setting color from status
+        if string == "COMPLETED":
+            return "CD"
+        elif string =="EXEMPT":
+            return "CG"
+        elif string == "COMPLETED WITH ERROR":
+            return " F"
+        elif string == "SUBMITTED" or string =="SEQUENTIALLY QUEUED":
+            return "PD"
+        elif string == "PROCESSING STARTING":
+            return " R"
+        elif string == "TERMINATED" or string == "CANCELED":
+            return "ST"
         else:
-            if len(string) > length:
-                return string[0:length-3]+"..."
-            else:
-                return string + " "*(len(string)-length)
+            return "UN"   
 
     def extractFromJobEntry(self, jobEntry : api.JobEntry):
         # Compute time depending on status
@@ -66,7 +74,7 @@ class RichPrinter(GenPrinter):
             table.add_column("Name")
             table.add_column("App")
             table.add_column("User")
-            table.add_column("Status")
+            table.add_column("St")
             table.add_column("Time")
             table.add_column("Nodes")
             table.add_column("Machine type")
@@ -91,7 +99,7 @@ class RichPrinter(GenPrinter):
                               jobEntry.job_name,
                               f"{jobEntry.job_application}/{jobEntry.job_command}",
                               jobEntry.job_owner_username,
-                              jobEntry.job_status,
+                              self.shortStatus(jobEntry.job_status),
                               deltaTime,
                               f"{nbNodes}",
                               machineType,
@@ -100,10 +108,18 @@ class RichPrinter(GenPrinter):
             console = rich.console.Console()
             console.print(table)
 
-class RawPrinter(GenPrinter):
+class NoRichPrinter(GenPrinter):
     def __init__(self):
         pass
 
+    def formatSize(self, string : Union[StrictStr,None], length : int):
+        if string is None:
+            return " "*length
+        else:
+            if len(string) > length:
+                return string[0:length-3]+"..."
+            else:
+                return string + " "*(length-len(string))
 
 
     def printJobEntry(self, jobEntryList : Dict[str, api.JobEntry], verbose=False):
@@ -115,13 +131,20 @@ class RawPrinter(GenPrinter):
         else:
             for id,jobEntry in jobEntryList.items():
                 deltaTime, nbNodes, machineType = self.extractFromJobEntry(jobEntry)
-                print("ID,Name,App,User,Status,Time,Nodes,Machine type")
-                print(f"id,",
-                      f"{jobEntry.job_name}",
-                      f"{jobEntry.job_application}/{jobEntry.job_command}",
-                      f"{jobEntry.job_owner_username}",
-                      f"{jobEntry.job_status}",
-                      f"{deltaTime}",
-                      f"{nbNodes}",
-                      f"{machineType}",
-                      sep=",")
+                print("ID  ",
+                      "Name"+ 16*" ",
+                      "App"+ 17*" ",
+                      "User"+ 11*" ",
+                      "St",
+                      "Time"+ 6*" ",
+                      "#N  ",
+                      "Machine type", sep=" ")
+                print(f"{self.formatSize(id,4)}",
+                      f"{self.formatSize(jobEntry.job_name, 20)}",
+                      f"{self.formatSize(f'{jobEntry.job_application}/{jobEntry.job_command}',20)}",
+                      f"{self.formatSize(jobEntry.job_owner_username,15)}",
+                      f"{self.shortStatus(jobEntry.job_status)}",
+                      f"{self.formatSize(deltaTime,10)}",
+                      f"{self.formatSize(str(nbNodes), 4)}",
+                      f"{self.formatSize(machineType,18)}",
+                      sep=" ")
