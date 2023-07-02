@@ -1,9 +1,9 @@
 from collections import OrderedDict
 from typing import Optional, Tuple, Union
-import json
-import logging
 import jarviceapi_client
+import jarviceapi_client.exceptions as apiException
 from pathlib import Path
+from traceback import print_exc
 
 class jarviceapi:
     _username : str
@@ -119,17 +119,15 @@ class jarviceapi:
         """
         Get a list of currently running jobs
 
+        Returns:
+            jobs (Dict[str, JobEntry]) : Job dictionnary
+
         Raises:
-            Exception: Raises an exception.
+            apiException.OpenApiException
         """
         with jarviceapi_client.ApiClient(self._configuration) as api_client:
             api_instance = jarviceapi_client.StatusAndInformationApi(api_client)
-            try:
-                api_response = api_instance.jobs_get(self._apikey, self._username)
-                print(api_response)
-            except Exception as e:
-                print("Exception when calling jobs: %s\n" % e)
-            
+            return api_instance.jobs_get(self._apikey, self._username)
 
     def shutdown_all(self):
         """

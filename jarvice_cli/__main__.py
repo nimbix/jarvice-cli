@@ -5,8 +5,8 @@ import typer
 import os
 from typing import Optional, Annotated, Dict
 
-#from RESTInterface import *
 from jarviceapi import *
+from printer import *
 
 jarvice_cli = typer.Typer(help="The JARVICE CLI for interacting with Jarvice XE")
 
@@ -248,14 +248,28 @@ def action(
         print(e)
 
 @jarvice_cli.command()
-def jobs():
+def jobs(
+    verbose: Annotated[Optional[bool], typer.Option("-v", "--verbose",help="Full JSON payload")] = False,
+    raw : Annotated[Optional[bool], typer.Option("-r", "--raw",help="CSV style")] = False
+    ):
     """
     Get a list of currently running jobs
     """
     try:
-        jarvice_api.jobs()
-    except Exception as e:
-        print(e)
+        if verbose is None:
+            verbose = False
+        if raw:
+            printer = RawPrinter()
+        else:
+            printer = RichPrinter()
+            jarvice_cli.rich_markup_mode
+
+        joblist = jarvice_api.jobs()
+        printer.printJobEntry(joblist, verbose)
+    except apiException.UnauthorizedException as e:
+        print ("Error : Unauthorized\nInvalid username or apikey")
+    except apiException.OpenApiException as e:
+        print(f"Error : {e}")
 
 @jarvice_cli.command()
 def shutdown_all():
