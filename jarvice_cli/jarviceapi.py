@@ -145,7 +145,15 @@ class jarviceapi:
         Raises:
             Exception: Raises an exception.
         """
-        raise Exception("info is not implemented")
+        with jarviceapi_client.ApiClient(self._configuration) as api_client:
+            api_instance = jarviceapi_client.StatusAndInformationApi(api_client)
+            
+            if type(job) is str:
+                return api_instance.info_get(self._apikey, self._username, name=job)
+            elif type(job) is int:
+                return api_instance.info_get(self._apikey, self._username, number=job)
+            else:
+                raise apiException.ApiException(status=501, http_resp="Invalid parameters")
 
     def status(self, job : Union[int, str]):
         """
@@ -154,8 +162,15 @@ class jarviceapi:
         Raises:
             Exception: Raises an exception.
         """
-        
-        raise Exception("status is not implemented")
+        with jarviceapi_client.ApiClient(self._configuration) as api_client:
+            api_instance = jarviceapi_client.StatusAndInformationApi(api_client)
+            
+            if type(job) is str:
+                return api_instance.status_get(self._apikey, self._username, name=job)
+            elif type(job) is int:
+                return api_instance.status_get(self._apikey, self._username, number=job)
+            else:
+                raise apiException.ApiException(status=501, http_resp="Invalid parameters")
 
     def action(self, action : str, job : Union[int, str]):
         """

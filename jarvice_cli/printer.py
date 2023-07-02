@@ -12,6 +12,7 @@ import datetime
 
 import typer
 
+#TODO Richify a lot
 class GenPrinter:
     def __init__(self):
         pass
@@ -53,6 +54,34 @@ class GenPrinter:
             nbNodes = jobEntry.job_api_submission.machine.nodes if jobEntry.job_api_submission.machine.nodes is not None else "#"
             machineType = jobEntry.job_api_submission.machine.type if jobEntry.job_api_submission.machine.type is not None else "#"
         return deltaTime, nbNodes, machineType
+    
+    def printRuntimeInfo(self, rtInfo : api.RuntimeInfo):
+        print(f"address: {rtInfo.address}",
+              f"password: {rtInfo.password}",
+              f"url: {rtInfo.url}",
+              f"about: {rtInfo.about}",sep="\n")
+        if bool(rtInfo.actions):
+            print("actions:")
+            for k,v in rtInfo.actions:
+                print(f"{k}: {v}")
+
+    def printSchedStatusEntry(self,id : int, entry : api.SchedJobStatusEntry):
+        print(f"ID: {id}",
+              f"Job Name: {entry.job_name}",
+              f"Project: {entry.job_project}",
+              f"Application: {entry.job_application}/{entry.job_command}",
+              f"Status: {entry.job_status} ({self.shortStatus(entry.job_status)})",
+              f"SStatus: {entry.job_substatus}",
+              sep="\n")
+        if entry.job_submit_time:
+              print(f"Submit Time: {datetime.datetime.fromtimestamp(entry.job_submit_time)}")
+        if entry.job_start_time:
+              print(f"Start Time: {datetime.datetime.fromtimestamp(entry.job_start_time)}")
+        if entry.job_end_time:
+              print(f"End Time: {datetime.datetime.fromtimestamp(entry.job_end_time)}")
+        if entry.job_walltime:
+              print(f"Walltime: {entry.job_walltime}")
+              
 
 
 class RichPrinter(GenPrinter):

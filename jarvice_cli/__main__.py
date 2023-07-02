@@ -199,6 +199,7 @@ def terminate(
 def info(
     jobid: Annotated[Optional[int], typer.Option("-j", "--jobid",help="ID of the job [required or --jobname required]")] = None,
     jobname: Annotated[Optional[str], typer.Option("-n", "--jobname",help="Name of the job [required or --jobid required]")] = None,
+    raw : Annotated[Optional[bool], typer.Option("--no-rich",help="Without color")] = False
 ):
     """
     Get the stats on your job
@@ -206,16 +207,25 @@ def info(
     validateJobidJobname(jobid, jobname)
     try:
         if jobid is not None:
-            jarvice_api.info(jobid)
+            entry = jarvice_api.info(jobid)
         elif jobname is not None:
-            jarvice_api.info(jobname)
-    except Exception as e:
-        print(e)
+            entry = jarvice_api.info(jobname)
+        else:
+            return
+        if raw:
+            printer = NoRichPrinter()
+        else:
+            printer = RichPrinter()
+
+        printer.printRuntimeInfo(entry)
+    except apiException.OpenApiException as e:
+        print(f"Error : {e}")
 
 @jarvice_cli.command()
 def status(
     jobid: Annotated[Optional[int], typer.Option("-j", "--jobid",help="ID of the job [required or --jobname required]")] = None,
     jobname: Annotated[Optional[str], typer.Option("-n", "--jobname",help="Name of the job [required or --jobid required]")] = None,
+    raw : Annotated[Optional[bool], typer.Option("--no-rich",help="Without color")] = False
 ):
     """
     Get status of a job
@@ -223,11 +233,21 @@ def status(
     validateJobidJobname(jobid, jobname)
     try:
         if jobid is not None:
-            jarvice_api.status(jobid)
+            entry = jarvice_api.status(jobid)
         elif jobname is not None:
-            jarvice_api.status(jobname)
-    except Exception as e:
-        print(e)
+            entry = jarvice_api.status(jobname)
+        else:
+            return
+        if raw:
+            printer = NoRichPrinter()
+        else:
+            printer = RichPrinter()
+        
+        for k,v in entry.items():
+            printer.printSchedStatusEntry(int(k),v)
+
+    except apiException.OpenApiException as e:
+        print(f"Error : {e}")
 
 @jarvice_cli.command(deprecated=True)
 def action(
@@ -273,7 +293,6 @@ def jobs(
             printer = NoRichPrinter()
         else:
             printer = RichPrinter()
-            jarvice_cli.rich_markup_mode
 
         joblist = jarvice_api.jobs()
         printer.printJobEntry(joblist, verbose)
