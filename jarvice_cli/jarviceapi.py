@@ -1,14 +1,19 @@
 from collections import OrderedDict
+import json
 from typing import Optional, Tuple, Union
 import jarviceapi_client
 import jarviceapi_client.exceptions as apiException
 from pathlib import Path
 from traceback import print_exc
 
+import rich
+
+from jarvice_cli.__main__ import jobs
+
 class jarviceapi:
     _username : str
     _apikey : str
-    _uconfiguration : str
+    _configuration : jarviceapi_client.Configuration
 
     def __init__(self, username : str, apikey : str, url : str):
         self._username = username
@@ -27,7 +32,19 @@ class jarviceapi:
         Raises:
             Exception: Raises an exception.
         """
-        raise Exception("submit is not implemented")
+        with jarviceapi_client.ApiClient(self._configuration) as api_client:
+            api_instance = jarviceapi_client.JobControlApi(api_client)
+            with open(job_jsonfile) as job_jsonfile_hd:
+                json_object = json.load(job_jsonfile_hd)
+                jobSubmission = jarviceapi_client.Submission.from_dict(json_object)
+                # Inject user
+                if jobSubmission.user is None:
+                    jobSubmission.user = jarviceapi_client.SubmitUser()
+                jobSubmission.user.username = self._username
+                jobSubmission.user.apikey = self._apikey
+
+                return api_instance.submit_post(jobSubmission)
+            
 
     def summary(self):
         """
@@ -110,9 +127,14 @@ class jarviceapi:
         Perform a configured action on your job
 
         Raises:
-            Exception: Raises an exception.
+            apiException.OpenApiException
         """
-        raise Exception("action is not implemented")
+        with jarviceapi_client.ApiClient(self._configuration) as api_client:
+            api_instance = jarviceapi_client.JobControlApi(api_client)
+            if type(job) is str:
+                return api_instance.action_get(self._apikey, self._username, action, name=job)
+            elif type(job) is int:
+                return api_instance.action_get(self._apikey, self._username, action, number=job)
 
 
     def jobs(self):

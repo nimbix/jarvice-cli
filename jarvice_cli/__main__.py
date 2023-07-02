@@ -88,9 +88,12 @@ def submit(
     Submit a job
     """
     try:
-        jarvice_api.submit(job_json)
-    except Exception as e:
-        print(e)
+        retDict = jarvice_api.submit(job_json)
+        print("Submitted:",
+              f"- ID  : {retDict['number']}",
+              f"- Name: {retDict['name']}", sep='\n')
+    except apiException.OpenApiException as e:
+        print(f"Error : {e}")
 
 @jarvice_cli.command()
 def summary():
@@ -244,8 +247,11 @@ def action(
             jarvice_api.action(action, jobid)
         elif jobname is not None:
             jarvice_api.action(action, jobname)
-    except Exception as e:
-        print(e)
+        print(f"Action requested : {action}")
+    except apiException.UnauthorizedException as e:
+        print ("Error : Unauthorized\nInvalid username or apikey")
+    except apiException.OpenApiException as e:
+        print(f"Error : {e}")
 
 @jarvice_cli.command()
 def jobs(
