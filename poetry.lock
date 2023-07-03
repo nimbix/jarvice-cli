@@ -39,7 +39,7 @@ files = [
 
 [[package]]
 name = "jarviceapi-client"
-version = "1.0.2"
+version = "1.0.4"
 description = "Jarvice API"
 optional = false
 python-versions = "^3.7"
@@ -56,7 +56,7 @@ urllib3 = ">= 1.25.3"
 type = "git"
 url = "https://github.com/nimbix/python-jarviceapi"
 reference = "HEAD"
-resolved_reference = "f3043fb845ac80dcafbf69cf697226c99fb2ee32"
+resolved_reference = "19e2be00fcca9771cc33eef96706b8d85e88c872"
 
 [[package]]
 name = "markdown-it-py"

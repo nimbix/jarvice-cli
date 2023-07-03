@@ -225,11 +225,10 @@ class jarviceapi:
     def wait_for(self, job : Union[int, str]):
         """
         Wait for a job to end
-        
+
         Raises:
-            Exception: Raises an exception.
+            apiException.OpenApiException
         """
-        #trap for "COMPLETED WITH ERROR","COMPLETED","TERMINATED" "CANCELED"
         while True:
             statusDict = self.status(job)
             for _,v in statusDict.items():
@@ -264,6 +263,9 @@ class jarviceapi:
             Exception: Raises an exception.
         """
         raise Exception("ls is not implemented")
+        with jarviceapi_client.ApiClient(self._configuration) as api_client:
+            api_instance = jarviceapi_client.StatusAndInformationApi(api_client)
+            return api_instance.vault_get(self._apikey, self._username)
 
     def apps(self):
         """
@@ -279,7 +281,9 @@ class jarviceapi:
         List all instances
 
         Raises:
-            Exception: Raises an exception.
+            apiException.OpenApiException
         """
-        raise Exception("machines is not implemented")
+        with jarviceapi_client.ApiClient(self._configuration) as api_client:
+            api_instance = jarviceapi_client.StatusAndInformationApi(api_client)
+            return api_instance.machines_get(self._apikey, self._username)
 

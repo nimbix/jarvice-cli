@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Dict, Union
+from typing import Dict, List, Union, Tuple
 from pydantic import StrictStr
 import rich
 import rich.table
@@ -14,11 +14,81 @@ import typer
 
 #TODO Richify a lot
 class GenPrinter:
+
+    _fields : List[Tuple[str,str]]
+
     def __init__(self):
-        pass
+        self._fields = []
+              
+    def newField(self, fieldName : str, fieldValue : str):
+        self._fields.append((fieldName, fieldValue))
+
+    def flushField(self, title : str = ""):
+        if title != "":
+            print(title)
+        for field in self._fields:
+            print(f"{field[0]}: {field[1]}")
+        self._fields.clear()
+
+    def printMachines(self, machineList : Dict[str,api.MachineDef]):
+        
+        for name,mc in machineList.items():
+            self.newField("Description", str(mc.mc_description))
+            self.newField("Arch", str(mc.mc_arch))
+            if mc.mc_slave_cores:
+                self.newField("Cores", str(mc.mc_slave_cores))
+                self.newField("RAM", str(mc.mc_slave_ram))
+                self.newField("GPUs", str(mc.mc_slave_gpus))
+                self.newField("Properties", str(mc.mc_slave_properties))
+            else:
+                self.newField("Cores", str(mc.mc_cores))
+                self.newField("RAM", str(mc.mc_ram))
+                self.newField("GPUs", str(mc.mc_gpus))
+                self.newField("Properties", str(mc.mc_properties))
+            self.newField("Devices", str(mc.mc_devices))
+            self.newField("Scratch", str(mc.mc_scratch))
+            self.newField("Swap", str(mc.mc_swap))
+            self.newField("Min Scale", str(mc.mc_scale_min))
+            self.newField("Max Scale", str(mc.mc_scale_max))
+            self.newField("Price", str(mc.mc_price))
+
+            self.flushField(name)
+
+    def formatSize(self, string : Union[StrictStr,None], length : int):
+        if string is None:
+            return " "*length
+        else:
+            if len(string) > length:
+                return string[0:length-3]+"..."
+            else:
+                return string + " "*(length-len(string))
 
     def printJobEntry(self, jobEntryList : Dict[str, api.JobEntry], verbose=False):
-        pass
+        if verbose:
+            new_dict = {}
+            for id,jobEntry in jobEntryList.items():
+                new_dict[id] = json.loads(jobEntry.to_json())
+            print(json.dumps(new_dict, indent= 2))
+        else:
+            for id,jobEntry in jobEntryList.items():
+                deltaTime, nbNodes, machineType = self.extractFromJobEntry(jobEntry)
+                print("ID  ",
+                      "Name"+ 16*" ",
+                      "App"+ 17*" ",
+                      "User"+ 11*" ",
+                      "St",
+                      "Time"+ 6*" ",
+                      "#N  ",
+                      "Machine type", sep=" ")
+                print(f"{self.formatSize(id,4)}",
+                      f"{self.formatSize(jobEntry.job_name, 20)}",
+                      f"{self.formatSize(f'{jobEntry.job_application}/{jobEntry.job_command}',20)}",
+                      f"{self.formatSize(jobEntry.job_owner_username,15)}",
+                      f"{self.shortStatus(jobEntry.job_status)}",
+                      f"{self.formatSize(deltaTime,10)}",
+                      f"{self.formatSize(str(nbNodes), 4)}",
+                      f"{self.formatSize(machineType,18)}",
+                      sep=" ")
  
     def shortStatus(self, string : Union[StrictStr,None]):
         # Setting color from status
@@ -81,12 +151,13 @@ class GenPrinter:
               print(f"End Time: {datetime.datetime.fromtimestamp(entry.job_end_time)}")
         if entry.job_walltime:
               print(f"Walltime: {entry.job_walltime}")
-              
-
 
 class RichPrinter(GenPrinter):
+
+    #_fields : List[Tuple[str,str]]
+
     def __init__(self):
-        pass
+        super().__init__()
 
     ##TODO : (TOFIX) jobEntry.job_stats.compute_time is always 0
     def printJobEntry(self, jobEntryList : Dict[str,api.JobEntry], verbose = False):
@@ -136,44 +207,4 @@ class RichPrinter(GenPrinter):
 
             console = rich.console.Console()
             console.print(table)
-
-class NoRichPrinter(GenPrinter):
-    def __init__(self):
-        pass
-
-    def formatSize(self, string : Union[StrictStr,None], length : int):
-        if string is None:
-            return " "*length
-        else:
-            if len(string) > length:
-                return string[0:length-3]+"..."
-            else:
-                return string + " "*(length-len(string))
-
-
-    def printJobEntry(self, jobEntryList : Dict[str, api.JobEntry], verbose=False):
-        if verbose:
-            new_dict = {}
-            for id,jobEntry in jobEntryList.items():
-                new_dict[id] = json.loads(jobEntry.to_json())
-            print(json.dumps(new_dict, indent= 2))
-        else:
-            for id,jobEntry in jobEntryList.items():
-                deltaTime, nbNodes, machineType = self.extractFromJobEntry(jobEntry)
-                print("ID  ",
-                      "Name"+ 16*" ",
-                      "App"+ 17*" ",
-                      "User"+ 11*" ",
-                      "St",
-                      "Time"+ 6*" ",
-                      "#N  ",
-                      "Machine type", sep=" ")
-                print(f"{self.formatSize(id,4)}",
-                      f"{self.formatSize(jobEntry.job_name, 20)}",
-                      f"{self.formatSize(f'{jobEntry.job_application}/{jobEntry.job_command}',20)}",
-                      f"{self.formatSize(jobEntry.job_owner_username,15)}",
-                      f"{self.shortStatus(jobEntry.job_status)}",
-                      f"{self.formatSize(deltaTime,10)}",
-                      f"{self.formatSize(str(nbNodes), 4)}",
-                      f"{self.formatSize(machineType,18)}",
-                      sep=" ")
+                          

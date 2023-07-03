@@ -85,15 +85,20 @@ def submit(
             resolve_path=True,
         ),
     ],
+    raw : Annotated[Optional[bool], typer.Option("--no-rich",help="Without color")] = False
 ):
     """
     Submit a job
     """
     try:
         retDict = jarvice_api.submitJsonFile(job_json)
-        print("Submitted:",
-              f"- ID  : {retDict['number']}",
-              f"- Name: {retDict['name']}", sep='\n')
+        if raw:
+            printer = GenPrinter()
+        else:
+            printer = RichPrinter()
+        printer.newField("ID", str(retDict['number']))
+        printer.newField("Name", str(retDict['name']))
+        printer.flushField("Submitted")
     except jarviceapi_client.OpenApiException as e:
         print(f"Error : {e}")
 
@@ -146,6 +151,7 @@ def output(
 def connect(
     jobid: Annotated[Optional[int], typer.Option("-j", "--jobid",help="ID of the job [required or --jobname required]")] = None,
     jobname: Annotated[Optional[str], typer.Option("-n", "--jobname",help="Name of the job [required or --jobid required]")] = None,
+    raw : Annotated[Optional[bool], typer.Option("--no-rich",help="Without color")] = False
 ):
     """
     Get connection details (address, password)
@@ -158,8 +164,13 @@ def connect(
             address,password = jarvice_api.connect(jobname)
         else:
             return
-        print(f"Address : {address}")
-        print(f"Password : {password}")
+        if raw:
+            printer = GenPrinter()
+        else:
+            printer = RichPrinter()
+        printer.newField("Address", address)
+        printer.newField("Password", password)
+        printer.flushField()
     except jarviceapi_client.OpenApiException as e:
         print(f"Error : {e}")
 
@@ -215,7 +226,7 @@ def info(
         else:
             return
         if raw:
-            printer = NoRichPrinter()
+            printer = GenPrinter()
         else:
             printer = RichPrinter()
 
@@ -241,7 +252,7 @@ def status(
         else:
             return
         if raw:
-            printer = NoRichPrinter()
+            printer = GenPrinter()
         else:
             printer = RichPrinter()
         
@@ -256,6 +267,7 @@ def action(
     action: Annotated[str, typer.Argument(help="action name, given by info")],
     jobid: Annotated[Optional[int], typer.Option("-j", "--jobid",help="ID of the job [required or --jobname required]")] = None,
     jobname: Annotated[Optional[str], typer.Option("-n", "--jobname",help="Name of the job [required or --jobid required]")] = None,
+    raw : Annotated[Optional[bool], typer.Option("--no-rich",help="Without color")] = False
 ):
     """
     Perform a configured action on your job
@@ -266,7 +278,13 @@ def action(
             jarvice_api.action(action, jobid)
         elif jobname is not None:
             jarvice_api.action(action, jobname)
-        print(f"Action requested : {action}")
+        if raw:
+            printer = GenPrinter()
+        else:
+            printer = RichPrinter()
+        printer.newField("Action requested", action)
+        printer.flushField()
+
     except jarviceapi_client.OpenApiException as e:
         print(f"Error : {e}")
 
@@ -290,7 +308,7 @@ def jobs(
         if verbose is None:
             verbose = False
         if raw:
-            printer = NoRichPrinter()
+            printer = GenPrinter()
         else:
             printer = RichPrinter()
 
@@ -395,14 +413,20 @@ def apps():
         print(e)
 
 @jarvice_cli.command()
-def machines():
+def machines(
+    raw : Annotated[Optional[bool], typer.Option("--no-rich",help="Without color")] = False
+    ):
     """
     List all instances
     """
-    try:        
-        jarvice_api.machines()
-    except Exception as e:
-        print(e)
+    try:
+        if raw:
+            printer = GenPrinter()
+        else:
+            printer = RichPrinter()        
+        printer.printMachines(jarvice_api.machines())
+    except jarviceapi_client.OpenApiException as e:
+        print(f"Error : {e}")
 
 if __name__ == "__main__":
     jarvice_cli()
