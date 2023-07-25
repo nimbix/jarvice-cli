@@ -151,6 +151,36 @@ class GenPrinter:
               print(f"End Time: {datetime.datetime.fromtimestamp(entry.job_end_time)}")
         if entry.job_walltime:
               print(f"Walltime: {entry.job_walltime}")
+    
+    def printApps(self, apps : Dict[str, api.App], verbose = False):
+        if verbose:
+            print(apps)
+        else:
+            for k,v in apps.items():
+                if v.data is None:
+                    print(k)
+                else:
+                    if v.data.commands is None:
+                        commands =""
+                    else:
+                        commands = ",".join(v.data.commands.keys())
+                        commands = ": [" + commands + "]"
+                    print(f"{k} : {v.data.name} {v.data.author} {commands}")
+
+    def printApp(self, app : api.App, verbose = False):
+        if verbose:
+            print(app)
+        else:
+            if app.data is None:
+                print(app.id)
+                return
+            
+            print(f"{app.data.name} {app.data.author}")
+
+            if app.data.commands is not None:
+                for cmd, data in app.data.commands.items():
+                    print(f"{cmd} : {data.description}")
+
 
 class RichPrinter(GenPrinter):
 
@@ -207,4 +237,49 @@ class RichPrinter(GenPrinter):
 
             console = rich.console.Console()
             console.print(table)
-                          
+   
+    def printApps(self, apps : Dict[str, api.App], verbose = False):
+        if verbose:
+            for k,v in apps.items():
+                rich.inspect(v)
+        else:
+            table = rich.table.Table(style="on black")
+            table.add_column("ID")
+            table.add_column("App")
+            table.add_column("Author")
+            table.add_column("Commands")
+            for k,v in apps.items():
+                if v.data is None:
+                    name = ""
+                    author = ""
+                    commands = ""
+                else:
+                    name = v.data.name
+                    author = v.data.author
+                    if v.data.commands is None:
+                        commands =""
+                    else:
+                        commands = ",".join(v.data.commands.keys())
+                    
+                table.add_row(k, name, author, commands)
+
+            console = rich.console.Console()
+            console.print(table)
+
+    def printApp(self, app : api.App, verbose = False):
+        if verbose:
+            rich.inspect(app)
+        else:
+            if app.data is None:
+                print(app.id)
+                return
+            
+            table = rich.table.Table(title=f"{app.data.name} {app.data.author}", style="on black")
+
+            if app.data.commands is not None:
+                table.add_column("Command")
+                table.add_column("Description")
+                for cmd, data in app.data.commands.items():
+                    table.add_row(cmd, data.description)
+            console = rich.console.Console()
+            console.print(table)

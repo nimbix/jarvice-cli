@@ -269,12 +269,28 @@ class jarviceapi:
 
     def apps(self):
         """
-        List apps and gives a schema describing outputs
+        List apps
 
         Raises:
             Exception: Raises an exception.
         """
-        raise Exception("apps is not implemented")
+        with jarviceapi_client.ApiClient(self._configuration) as api_client:
+            api_instance = jarviceapi_client.StatusAndInformationApi(api_client)
+            appDefList = api_instance.apps_get(self._apikey, self._username)
+            return appDefList
+
+    def app(self, name : str):
+        """
+        Gives a schema describing AppDef
+
+        Raises:
+            Exception: Raises an exception.
+        """
+        with jarviceapi_client.ApiClient(self._configuration) as api_client:
+            api_instance = jarviceapi_client.StatusAndInformationApi(api_client)
+            
+            return api_instance.apps_get(self._apikey, self._username, name=name)
+
 
     def machines(self):
         """

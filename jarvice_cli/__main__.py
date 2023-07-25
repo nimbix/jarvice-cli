@@ -10,7 +10,7 @@ import jarviceapi_client
 from jarvice_cli.jarviceapi import jarviceapi
 from jarvice_cli.printer import *
 
-jarvice_cli = typer.Typer(help="The JARVICE CLI for interacting with Jarvice XE")
+jarvice_cli = typer.Typer(help="The JARVICE CLI for interacting with Jarvice XE", pretty_exceptions_enable=False)
 
 api_values : Dict[str, str]= {}
 
@@ -403,14 +403,31 @@ def ls(
 ## Querying JARVICE Options ##
 
 @jarvice_cli.command()
-def apps():
+def apps(
+    appname: Annotated[Optional[str], typer.Option("-n", "--name",help="Name of the app to ")] = None,
+    verbose: Annotated[Optional[bool], typer.Option("-v", "--verbose",help="Full JSON payload")] = False,
+    raw : Annotated[Optional[bool], typer.Option("--no-rich",help="Without color")] = False
+):
     """
-    List apps and gives a schema describing outputs
+    List apps and gives a schema describing AppDef
     """
-    try:        
-        jarvice_api.apps()
-    except Exception as e:
-        print(e)
+    try:
+        if verbose is None:
+            verbose = False
+        if raw:
+            printer = GenPrinter()
+        else:
+            printer = RichPrinter()
+        if appname:        
+            app = jarvice_api.app(appname)
+            for _,v in app.items():
+                printer.printApp(v, verbose)
+        else:
+            apps = jarvice_api.apps()
+            printer.printApps(apps, verbose)
+
+    except jarviceapi_client.OpenApiException as e:
+        print(f"Error : {e}")
 
 @jarvice_cli.command()
 def machines(
