@@ -253,7 +253,7 @@ class jarviceapi:
         Raises:
             Exception: Raises an exception.
         """
-        raise Exception("download is not implemented")
+        raise Exception("upload is not implemented")
     
     def ls(self, storage : str, remote_dir: Optional[str] = None):
         """

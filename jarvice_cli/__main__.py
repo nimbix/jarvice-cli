@@ -357,7 +357,7 @@ def wait_for(
 
 ## Data Management ##
 
-@jarvice_cli.command()
+#@jarvice_cli.command()
 def download(
     source: Annotated[str, typer.Argument(help="File/directory to download")],
     destination: Annotated[str, typer.Argument(help="File/directory destination")],
@@ -371,7 +371,7 @@ def download(
     except Exception as e:
         print(e)
 
-@jarvice_cli.command()
+#@jarvice_cli.command()
 def upload(
     source: Annotated[str, typer.Argument(help="File/directory to upload")],
     destination: Annotated[str, typer.Argument(help="File/directory destination")],
@@ -385,7 +385,7 @@ def upload(
     except Exception as e:
         print(e)
 
-@jarvice_cli.command()
+#@jarvice_cli.command()
 def ls(
     storage : Annotated[str, typer.Argument(help="vault name")],
     remote_dir: Annotated[
