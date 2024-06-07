@@ -1,6 +1,6 @@
 {
-    "name": "Interactive demo",
-    "description": "Interactive demo",
+    "name": "JARVICE™ CLI",
+    "description": "Test container with new open-source version of jarvice-cli",
     "author": "Me",
     "licensed": false,
     "appdefversion": 2,

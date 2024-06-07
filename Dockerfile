@@ -12,7 +12,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y install ca-certificates curl --no-
         | bash
 
 # APP
-COPY poetry.lock pyproject.toml jarvice_cli README.md /tmp/
+COPY --chmod=755 poetry.lock pyproject.toml jarvice_cli README.md /tmp/jarvice_cli/
 RUN ln -sfn /usr/bin/python3.9 /usr/bin/python3
 #&& cd /tmp/ && pip3 install .
 
