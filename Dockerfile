@@ -13,7 +13,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y install ca-certificates curl --no-
 
 # APP
 COPY poetry.lock pyproject.toml jarvice_cli /tmp/
-RUN cd /tmp/ && pip3 install .
+RUN ln -sfn /usr/bin/python3.8 /usr/bin/python3 && cd /tmp/ && pip3 install .
 
 COPY NAE/ /etc/NAE/
 RUN curl --fail -X POST -d @/etc/NAE/AppDef.json https://cloud.nimbix.net/api/jarvice/validate
