@@ -3,7 +3,9 @@ FROM ubuntu:20.04
 RUN apt-get update && \
     apt-get -y install software-properties-common && \
     add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get -y install python3.9 python3-pip && \
+    apt-get -y install python3.9 && \
+    ln -sfn /usr/bin/python3.9 /usr/bin/python3 && \
+    apt-get install python3-pip && \
     apt-get -y clean
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get -y install ca-certificates curl --no-install-recommends && \
@@ -12,9 +14,10 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y install ca-certificates curl --no-
         | bash
 
 # APP
-COPY --chmod=755 poetry.lock pyproject.toml jarvice_cli README.md /tmp/jarvice_cli/
-RUN ln -sfn /usr/bin/python3.9 /usr/bin/python3
-#&& cd /tmp/ && pip3 install .
+COPY --chmod=755 poetry.lock pyproject.toml README.md /tmp/jarvice_cli/
+COPY --chmod=755 jarvice_cli /tmp/jarvice_cli/jarvice_cli
+
+RUN pip3 install /tmp/jarvice_cli
 
 COPY NAE/ /etc/NAE/
 RUN curl --fail -X POST -d @/etc/NAE/AppDef.json https://cloud.nimbix.net/api/jarvice/validate
