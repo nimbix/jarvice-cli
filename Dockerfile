@@ -5,7 +5,7 @@ RUN apt-get update && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get -y install python3.9 && \
     ln -sfn /usr/bin/python3.9 /usr/bin/python3 && \
-    apt-get install python3-pip && \
+    apt-get -y install python3-pip && \
     apt-get -y clean
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get -y install ca-certificates curl --no-install-recommends && \
