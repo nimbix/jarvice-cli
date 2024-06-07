@@ -1,0 +1,40 @@
+{
+    "name": "Interactive demo",
+    "description": "Interactive demo",
+    "author": "Me",
+    "licensed": false,
+    "appdefversion": 2,
+    "classifications": [
+    "System"
+    ],
+    "machines": [
+    "*"
+    ],
+    "vault-types": [
+    "FILE",
+    "BLOCK",
+    "BLOCK_ARRAY",
+    "OBJECT"
+    ],
+    "commands": {
+        "desktop": {
+            "path": "/usr/bin/xfce4-terminal",
+            "name": "Desktop",
+            "description": "Ubuntu Desktop",
+            "desktop": true,
+            "parameters": {
+            }
+        },
+        "shell": {
+            "path": "/bin/bash -l",
+            "name": "Shell",
+            "webshell": true,
+            "description": "Ubuntu Webshell"
+        }
+    },
+    "image": {
+        "data": "",
+        "type": "image/png"
+    }
+}
+    
