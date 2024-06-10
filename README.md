@@ -23,7 +23,7 @@ For this to work, it requires 3 parameters :
 
 ```username``` and ```apikey``` can be found in your endpoint under Account > Profile :
 
-![screenshot username & apikey](https://github.com/nimbix/jarvice-cli/blob/test_docker/screenshot.png)
+![screenshot username & apikey](https://github.com/nimbix/jarvice-cli/blob/main/screenshot.png)
 
 Those 3 parameters can be passed by:
 -   Arguments: ```--username``` , ```--apikey``` , ```--url```
