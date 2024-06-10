@@ -17,9 +17,12 @@ Command for the CLI is :
 ```jarvice-cli```
 
 For this to work, it requires 3 parameters :
-| username | Username to login to your endpoint |
-| apikey | Apikey that you can find in your endpoint |
-| url | Your endpoint url, which must finish by /api/ |
+
+| Parameter | Description   |
+| --------- | ----------    |
+| username  | Username to login to your endpoint    |
+| apikey    | Apikey that you can find in your endpoint |
+| url   | Your endpoint url, which must finish by /api/ |
 
 ```username``` and ```apikey``` can be found in your endpoint under Account > Profile :
 
